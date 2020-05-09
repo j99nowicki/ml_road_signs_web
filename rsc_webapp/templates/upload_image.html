@@ -1,0 +1,101 @@
+<head>
+
+    <title>Road Signs Classification</title>
+    
+    <!--import script files needed from plotly and bootstrap-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    
+    </head>
+    
+    <body>
+    
+    <!--navbar links-->     
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+       <a class="navbar-brand" href="#">Road Signs Classification</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" 
+      data-target="#navbarTogglerDemo02" 
+      aria-controls="navbarTogglerDemo02" aria-expanded="false" 
+      aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+    
+      <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" href="https://github.com/j99nowicki/ml_road_signs">See in GitHub</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://benchmark.ini.rub.de/?section=gtsrb&subsection=about">GTSRB Dataset</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="http://benchmark.ini.rub.de/?section=gtsrb&subsection=results">GTSRB Scoreboard</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+    
+    <!--middle section-->       
+    <div class="row">
+    
+        <!--social media buttons column-->      
+        <div class="col-1 border-right">
+            <div id="follow-me" class="mt-3">
+                <a href="#">
+                    <img src="/static/img/githublogo.png" alt="See in GitHub" class="img-fluid ml-2">
+                </a>
+            </div>
+        </div>
+    
+        <!--Main column-->        
+        <div class="col-11">
+    
+            <!--chart descriptions-->       
+            <div id="middle-info" class="mt-3">
+    
+                <h2 id="tag-line">Upload image</h2>
+                <h4 id="tag-line" class="text-muted">supported file formats: JPG, PNG, GIF</h4>
+                
+            </div>
+            
+            <!--charts-->       
+            <div id="charts" class="container mt-3 text-center">
+                        
+                <!--top two charts-->       
+                <div class="row">
+                    <div class="col">
+                        <h1>Upload image</h1>
+                        <hr>
+                        <form action="/upload-image" method="POST" enctype="mulitpart/form-data"></form>
+                        <div class="form-group">
+                            <label>Select image</label>
+                            <div class="custom-file">
+                                <input type="file" class="custom-file-input" name="image" id="image">
+                                <label class="custom-file-lable" for="image">Select image...</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload image</button>
+                        </div>
+                    </div>
+                </div>
+    
+                                      
+            </div>
+        <div>
+    </div>
+    
+    <!--footer section-->               
+    <div id="footer" class="container"></div>
+    
+    </body>
+    
+    
+    <footer>
+    
+       
+    </footer>
+    
+    
+    </html>
