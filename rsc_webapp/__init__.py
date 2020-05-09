@@ -2,4 +2,4 @@ from flask import Flask
 
 app = Flask(__name__)
 
-from rsc-webapp import routes
+from rsc_webapp import routes

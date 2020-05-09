@@ -1,1 +1,1 @@
-web gunicorn rsc-webapp:app
+web gunicorn rsc_webapp:app
