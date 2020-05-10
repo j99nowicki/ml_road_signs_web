@@ -6,7 +6,9 @@ import os
 import logging
 from werkzeug.utils import secure_filename
 
-UPLOAD_FOLDER = 'C:/workspace/ml/webapp/ml_webapp/rsc_webapp/static/img/uploads'
+MYDIR = os.path.dirname(__file__)
+
+UPLOAD_FOLDER = MYDIR+'/static/img/uploads'
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -26,7 +28,8 @@ def index():
 
     return render_template('index.html',
                            ids=ids,
-                           figuresJSON=figuresJSON)
+                           figuresJSON=figuresJSON, 
+                           mydir=UPLOAD_FOLDER)
 
 
 def allowed_file(filename):
