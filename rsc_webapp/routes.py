@@ -30,8 +30,7 @@ def index():
 
     return render_template('index.html',
                            ids=ids,
-                           figuresJSON=figuresJSON, 
-                           mydir=UPLOAD_FOLDER)
+                           figuresJSON=figuresJSON)
 
 
 def allowed_file(filename):
@@ -56,8 +55,18 @@ def upload_image():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('uploaded_file',
-                                    filename=filename))
+#            return redirect(url_for('uploaded_file',filename=filename))
+            figures = return_figures()
+
+            # plot ids for the html id tag
+            ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
+
+            # Convert the plotly figures to JSON for javascript in html template
+            figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+
+            return render_template('index.html',
+                                ids=ids,
+                                figuresJSON=figuresJSON)
     return render_template('upload_image.html')
 
     '''
@@ -75,6 +84,12 @@ def uploaded_file(filename):
                                filename)
 
 
+@app.errorhandler(413)
+def forbidden(e):
+    app.logger.info(str(e.code) + ": " + e.name + ". " + e.description)
+    return render_template("error.html"), 413
+
+'''
 @app.errorhandler(HTTPException)
 def handle_exception(e):
     """Return custom HTTP error page."""
@@ -87,3 +102,18 @@ def handle_exception(e):
     return render_template('error.html',
                            error_code=str(e.code) + ": " + e.name + " " + e.description,
                            error_message=error_message), e.code
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    """Return JSON instead of HTML for HTTP errors."""
+    # start with the correct headers and status code from the error
+    response = e.get_response()
+    # replace the body with JSON
+    response.data = json.dumps({
+        "code": e.code,
+        "name": e.name,
+        "description": e.description,
+    })
+    response.content_type = "application/json"
+    return response
+'''
