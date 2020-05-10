@@ -9,7 +9,7 @@ from werkzeug.utils import secure_filename
 MYDIR = os.path.dirname(__file__)
 
 UPLOAD_FOLDER = MYDIR+'/static/img/uploads'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
