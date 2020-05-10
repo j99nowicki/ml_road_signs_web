@@ -5,6 +5,7 @@ from wrangling_scripts.wrangle_data import return_figures
 import os
 import logging
 from werkzeug.utils import secure_filename
+from werkzeug.exceptions import HTTPException
 
 MYDIR = os.path.dirname(__file__)
 
@@ -12,7 +13,7 @@ UPLOAD_FOLDER = MYDIR+'/static/img/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 0.1 * 1024 * 1024 
+app.config['MAX_CONTENT_LENGTH'] = 0.1 * 1024 * 1024 # file size limit: 5MB
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -72,3 +73,17 @@ def upload_image():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
+
+@app.errorhandler(HTTPException)
+def handle_exception(e):
+    """Return custom HTTP error page."""
+    # start with the correct headers and status code from the error
+    response = e.get_response()
+    error_message = ""
+    if e.code==413:
+        error_message = "Maximum allowd size is 5MB"
+    app.logger.info(str(e.code) + ": " + e.name + ". " + e.description)
+    return render_template('error.html',
+                           error_code=str(e.code) + ": " + e.name + " " + e.description,
+                           error_message=error_message), e.code
