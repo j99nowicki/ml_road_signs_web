@@ -12,6 +12,7 @@ UPLOAD_FOLDER = MYDIR+'/static/img/uploads'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 0.1 * 1024 * 1024 
 
 logging.basicConfig(level=logging.DEBUG)
 
