@@ -2,24 +2,45 @@ from rsc_webapp import app
 import json, plotly
 from flask import render_template, request, redirect, send_from_directory, url_for
 from wrangling_scripts.wrangle_data import return_figures
+from classifier.cnn_classifier import return_inference, ml_figures
 import os
 import logging
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 
 MYDIR = os.path.dirname(__file__)
-
-UPLOAD_FOLDER = MYDIR+'/static/img/uploads'
+UPLOAD_FOLDER_REL = '/static/img/uploads'
+UPLOAD_FOLDER = MYDIR + UPLOAD_FOLDER_REL
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+app.config['UPLOAD_FOLDER_REL'] = '/static/img/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 0.1 * 1024 * 1024 # file size limit: 5MB
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
+app.config['INITIAL_SIGN'] = 'attention_sign.png'
 
 logging.basicConfig(level=logging.DEBUG)
 
 @app.route('/')
 @app.route('/index')
-def index():
+def index(filename=None):
+    if filename==None:
+        filename = app.config['INITIAL_SIGN']
+    input_filename = os.path.join(app.config['UPLOAD_FOLDER_REL'], filename)
+    figures = ml_figures()
+
+    # plot ids for the html id tag
+    ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
+
+    # Convert the plotly figures to JSON for javascript in html template
+    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+
+    return render_template('index.html',
+                            ids=ids,
+                            figuresJSON=figuresJSON,
+                            input_filename=input_filename)
+
+@app.route('/figures')
+def figures():
     figures = return_figures()
 
     # plot ids for the html id tag
@@ -56,28 +77,10 @@ def upload_image():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 #            return redirect(url_for('uploaded_file',filename=filename))
-            figures = return_figures()
-
-            # plot ids for the html id tag
-            ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
-
-            # Convert the plotly figures to JSON for javascript in html template
-            figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
-
-            return render_template('index.html',
-                                ids=ids,
-                                figuresJSON=figuresJSON)
+            return index(filename=filename)
     return render_template('upload_image.html')
 
-    '''
-        if request.files:
-            image = request.files["image"]
-            #image.save(os.path.join(app.config["IMAGE_UPLOADS"], image.filename))
-            image.save('.', image.filename)
-            app.logger.info("Image saved: {}".format(image.filename))
-            return redirect(request.url)        
-    return render_template('upload_image.html')
-    '''
+
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],

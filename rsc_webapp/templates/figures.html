@@ -4,7 +4,6 @@
 
 <!--import script files needed from plotly and bootstrap-->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-<link rel="stylesheet" href="static/css/style.css">
 <link rel="shortcut icon" type="image/x-icon" href="/static/img/favicon.ico"/>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT" crossorigin="anonymous"></script> 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
@@ -64,44 +63,39 @@
         </div>
         
         <!--charts-->       
-        <div id="charts" class="container mt-3 text-center" >
+        <div id="charts" class="container mt-3 text-center">
                     
             <!--top two charts-->       
-            <div class="row" >
-                <div class="col-lg-6" >
-                    <div class="text-center sign-image">
-                        <img src="{{input_filename}}" class="rounded h-100 mw-100" alt="...">
-                   </div>                
+            <div class="row">
+                <div class="col-lg-6">
+                    <div id="{{ids[0]}}"></div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="text-center sign-image">
-                        <img src="/static/img/icons/18.png" class="rounded h-100 mw-100" alt="...">
-                   </div>                
+                    <div id="{{ids[1]}}"></div>
                 </div>
             </div>
 
             <!--bottom two charts-->        
             <div class="row mb-6">
-                <div class="col-lg-6" >
-                    <div class="text-center sign-image">
-                        <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
-                   </div>                
+                <div class="col-lg-6"> 
+                    <div id="chart3">
+                        <div id="{{ids[2]}}"></div>
+                    </div>
                 </div>
                 <div class="col-lg-6">
-                    <div class="text-center sign-image">
-                        <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
-                   </div>                
-                </div>              
-            </div>
-
-            <!--Create another row for a probability=ies chart-->        
-            <div class="row mb-5">
-                <div class="col-8">
-                    <div id="chart1">
-                        <div id="{{ids[0]}}"></div>
+                    <div id="chart4">
+                        <div id="{{ids[3]}}"></div>
                     </div>
-                  </div>
                 </div>
+            </div>
+           
+            <!--Create another row and place a fifth chart in that row-->        
+            <div class="row mb-6">
+              <div class="col-12">
+                <div id="chart5">
+                    <div id="{{ids[4]}}"></div>
+                </div>
+              </div>
             </div>
         </div>
     <div>
@@ -125,8 +119,7 @@
                 figures[i].layout || {});
         }
     </script>
-
-    
+     
 </footer>
 
 
