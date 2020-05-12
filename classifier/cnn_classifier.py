@@ -1,6 +1,7 @@
 import pandas as pd
 import plotly.graph_objs as go
 import numpy as np
+import json
 
 # TODO: Scroll down to line 157 and set up a fifth visualization for the data dashboard
 
@@ -195,26 +196,35 @@ def ml_figures():
 
     """
     df = pd.read_csv('data/probabilities.csv')
+
+    labels_path = 'data/class_index.json'
+    with open(labels_path) as json_data:
+        idx_to_labels = json.load(json_data)
+    predicted_label = idx_to_labels[str(18)][1]
+
+    top_probability = 0.999941
+
+    from rsc_webapp import app
+    app.logger.info(type(idx_to_labels))
+    labels = []
+    for k, v in idx_to_labels.items():
+      labels.append(v[1])
+
+    df = pd.read_csv('data/probabilities.csv')
     df.columns = ['class_id','probability']
-    df.sort_values('class_id', ascending=False, inplace=True) 
-
     
-    graph_five = []
-    df_five = cleandata('data/API_SP.RUR.TOTL_DS2_en_csv_v2_9914824.csv', ['Country Name', '2015'], ['2015'])
+    graph_prob = []
 
-    df_five.columns = ['country','year','ruralpopulation']
-    df_five.sort_values('ruralpopulation', ascending=False, inplace=True) 
-
-    graph_five.append(
+    graph_prob.append(
       go.Bar(
       x = df.probability.tolist(),
-      y = df.class_id.tolist(),
+      y = labels,
       orientation='h',
       textposition='outside',
       marker=dict(
-        color='rgba(50, 171, 96, 0.6)',
-        line=dict(
-            color='rgba(50, 171, 96, 1.0)',
+        color='rgba(00, 173, 255,  0.6)',
+        line=dict(#007bff
+            color='rgba(00, 173, 255, 1.0)',
             width=1)
         )
       )
@@ -228,28 +238,26 @@ def ml_figures():
                               y=xd, x=yd + 3,
                               text=str(yd) + '%',
                               font=dict(family='Arial', size=12,
-                                        color='rgb(50, 171, 96)'),
+                                        color='rgb(96, 50, 171)'),
                               showarrow=False))
 
-    layout_five = dict(title = 'Probabilities predicted for each sign category',
-                xaxis = dict(
+    layout_prob = dict(xaxis = dict(
                     title = 'Probability',
                     zeroline=False,
                     showline=False,
                     showticklabels=True,
                     showgrid=True,
                     domain=[0, 1]),
-                yaxis = dict(title = 'Sign', dtick=1),
+                yaxis = dict(dtick=1),
                 height=800,
                 #annotations=annotations,
-                margin=dict(l=100, r=20, t=70, b=70),
-                paper_bgcolor='rgb(255, 255, 255)',
-                plot_bgcolor='rgb(248, 248, 255)',
+                margin=dict(l=280, r=20, t=30, b=50),
+                paper_bgcolor='rgb(248, 249, 250)',
+                plot_bgcolor='rgb(248, 249, 250)',
                 uniformtext_minsize=8, uniformtext_mode='hide'
                 )
     
     # append all charts to the figures list
     figures = []
-    figures.append(dict(data=graph_five, layout=layout_five))
-
-    return figures
+    figures.append(dict(data=graph_prob, layout=layout_prob))
+    return figures, predicted_label, top_probability

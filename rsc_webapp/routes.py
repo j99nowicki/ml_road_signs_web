@@ -26,7 +26,7 @@ def index(filename=None):
     if filename==None:
         filename = app.config['INITIAL_SIGN']
     input_filename = os.path.join(app.config['UPLOAD_FOLDER_REL'], filename)
-    figures = ml_figures()
+    figures, sign_name, top_probability = ml_figures()
 
     # plot ids for the html id tag
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
@@ -38,8 +38,8 @@ def index(filename=None):
                             ids=ids,
                             figuresJSON=figuresJSON,
                             input_filename=input_filename,
-                            sign_name="General attention", 
-                            probability="0.999941")
+                            sign_name=sign_name, 
+                            probability=str(top_probability))
 
 @app.route('/figures')
 def figures():
