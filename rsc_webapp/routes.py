@@ -37,7 +37,9 @@ def index(filename=None):
     return render_template('index.html',
                             ids=ids,
                             figuresJSON=figuresJSON,
-                            input_filename=input_filename)
+                            input_filename=input_filename,
+                            sign_name="General attention", 
+                            probability="0.999941")
 
 @app.route('/figures')
 def figures():

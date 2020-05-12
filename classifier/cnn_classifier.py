@@ -222,7 +222,7 @@ def ml_figures():
     annotations = []
     probs = np.round(df.probability.tolist(), decimals=4)
 
-    for yd, xd in zip( probs, df.class_id.tolist()):
+    for yd, xd in zip(probs, df.class_id.tolist()):
       # labeling bars 
       annotations.append(dict(xref='x1', yref='y1',
                               y=xd, x=yd + 3,
