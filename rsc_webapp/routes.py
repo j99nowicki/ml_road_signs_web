@@ -20,13 +20,21 @@ app.config['INITIAL_SIGN'] = 'attention_sign.png'
 
 logging.basicConfig(level=logging.DEBUG)
 
+@app.before_first_request
+def initalize_model():
+    app.logger.info("Initalizing a model")
+    return
+
+
 @app.route('/')
 @app.route('/index')
 def index(filename=None):
     if filename==None:
         filename = app.config['INITIAL_SIGN']
     input_filename = os.path.join(app.config['UPLOAD_FOLDER_REL'], filename)
-    figures, sign_name, top_probability = ml_figures()
+    figures, sign_name, top_probability, torch_test = ml_figures()
+    app.logger.info("Torch test {}".format(torch_test))
+
 
     # plot ids for the html id tag
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]

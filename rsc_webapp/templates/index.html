@@ -16,7 +16,7 @@
 <body>
 
 <!--navbar links-->     
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+<nav class="navbar navbar-expand-lg navbar-dark bg-info sticky-top">
    <a class="navbar-brand" href="#">Road Signs Classification</a>
   <button class="navbar-toggler" type="button" data-toggle="collapse" 
   data-target="#navbarTogglerDemo02" 
@@ -55,65 +55,64 @@
     <!--Main column-->        
     <div class="col-11">
 
-        <!--Descriptions-->       
+        <!--Descriptions       
         <div id="middle-info" class="mt-3">
 
             <h2 id="tag-line">Recognise a road sign</h2>
             <h4 id="tag-line" class="text-muted">using Machine Learning model trained to classify 43 road sign classes</h4>
             
-        </div>
+        </div>-->
         
         <!--Input / output-->       
         <div id="input" class="container mt-3 text-center" >
                     
             <!--top two boxes-->
-            <div class="card bg-light mb-3" style="max-width: 540px;">
-                <h5 class="card-header">Recognise a road sign</h5>
+            <div class="card bg-light mb-3" >
+                <h5 class="card-header text-white bg-info">Recognise this road sign</h5>
                 <div class="row no-gutters">
                   <div class="col-sm-4">
                     <div class="sign-image">
                       <img src="{{input_filename}}" class="card-img" alt="Input image">
                     </div>  
-                    <a href="/upload-image" class="btn btn-outline-primary">Select image</a>
+                    <a href="/upload-image" class="btn btn-outline-info">Select image</a>
                   </div>
                   <div class="col-sm-8">
                     <div class="card-body">
-                      <h5 class="card-title">This is</h5>
+                      <h5 class="card-title">{{sign_name}}</h5>
                       <div class="predict-image">
                           <img src="/static/img/icons/18.png" class="rounded h-100 mw-100" alt="Predicted sign class">
                       </div>
-                      <p class="card-text">{{sign_name}}</p>
-                      <p class="card-text"><small class="text-muted">With probability: {{probability}}</small></p>
+                      <p class="card-text">With probability: {{probability}}</p>
                     </div>
                   </div>
                 </div>
             </div>
 
             <!--bottom two charts-->        
-            <div class="card bg-light mb-3" style="max-width: 540px;">
-                <h5 class="card-header">Spatial Transformer Network Layer</h5>
+            <div class="card bg-light mb-3">
+                <h5 class="card-header text-white bg-info">Spatial Transformer Network Layer</h5>
                 <div class="card-body">
-                    <h5 class="card-title">Special title treatment</h5>
-                    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
                         <div class="row no-gutters mb-6">
                             <div class="col-sm-6" >
+                                <p class="card-text">Input for ML</p>
                                 <div class="text-center sign-image">
-                                <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
-                            </div>                
+                                    <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
+                                </div>                
                             </div>
                             <div class="col-sm-6">
+                                <p class="card-text">Output from STN layer</p>
                                 <div class="text-center sign-image">
-                                <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
-                            </div>                
+                                    <img src="/static/img/icons/42.png" class="rounded h-100 mw-100" alt="...">
+                                </div>
+                                <a href="https://arxiv.org/pdf/1506.02025.pdf" class="text-info">Learn about STN</a>                
                             </div>
                         </div>    
-                    <a href="https://arxiv.org/pdf/1506.02025.pdf" class="btn btn-link">Learn more about STN</a>
                 </div>
             </div>
 
             <!--Create another row for a probability=ies chart-->
-            <div class="card bg-light mb-3" style="max-width: 540px;">
-                <h5 class="card-header">Probabilities predicted for each sign category</h5>
+            <div class="card bg-light mb-3">
+                <h5 class="card-header text-white bg-info">Probabilities predicted for each sign category</h5>
                 <div class="card-body">
                     <div class="row no-gutters mb-6">
                         <div class="col-sm-12">
