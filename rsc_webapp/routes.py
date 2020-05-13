@@ -10,21 +10,20 @@ from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 import urllib.request
 import tarfile
-
+import time
 import torch
 from torchvision import transforms
 
 
-MYDIR = os.path.dirname(__file__)
-UPLOAD_FOLDER_REL = '/static/img/uploads'
-UPLOAD_FOLDER = MYDIR + UPLOAD_FOLDER_REL
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
+app.config['MYDIR'] = os.path.dirname(__file__)
 app.config['UPLOAD_FOLDER_REL'] = '/static/img/uploads'
+app.config['IMG_FOLDER_REL'] = '/static/img'
 app.config['ICONS_FOLDER'] = '/static/img/icons'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['UPLOAD_FOLDER'] = app.config['MYDIR'] + app.config['UPLOAD_FOLDER_REL']
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
-app.config['INITIAL_SIGN'] = os.path.join(app.config['UPLOAD_FOLDER'], 'attention_sign.png')
+app.config['INITIAL_SIGN'] = app.config['MYDIR'] + app.config['IMG_FOLDER_REL']+ '/attention_sign.png'
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -33,12 +32,12 @@ def extract_tar_gz(filename, destination_dir):
         _tar.extractall(destination_dir)
 
 @app.before_first_request
-def initalize_model():
+def initalize():
     app.logger.info('Initalizing a model')
-    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/model-pt/model-1-99-177.tar.gz', MYDIR+'/static/ml/model-1-99-177.tar.gz')
-    extract_tar_gz(MYDIR+'/static/ml/model-1-99-177.tar.gz', MYDIR+'/static/ml/')
+    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/model-pt/model-1-99-177.tar.gz', app.config['MYDIR']  +'/static/ml/model-1-99-177.tar.gz')
+    extract_tar_gz(app.config['MYDIR'] +'/static/ml/model-1-99-177.tar.gz', app.config['MYDIR'] +'/static/ml/')
     model = BaselineNet().to('cpu')
-    model.load_state_dict(torch.load(MYDIR+'/static/ml/model.pre-trained_5', map_location=torch.device('cpu')))
+    model.load_state_dict(torch.load(app.config['MYDIR'] +'/static/ml/model.pre-trained_5', map_location=torch.device('cpu')))
     model.eval()
     transform_evaluate = transforms.Compose([
             transforms.Resize((32,32)),
@@ -49,6 +48,7 @@ def initalize_model():
     app.config['MODEL'] = model
     app.config['TRANSFORM_EVALUATE'] = transform_evaluate
 
+    app.logger.info('Loading labels')
     labels_path = 'data/class_index.json'
     with open(labels_path) as json_data:
         idx_to_labels = json.load(json_data)
@@ -59,24 +59,42 @@ def initalize_model():
       labels.append(v[1])
     app.config['LABELS'] = labels
 
+    #make sure the directory for uploading files is created
+    try:
+        os.mkdir(app.config['UPLOAD_FOLDER'])
+    except FileExistsError:
+        pass
 
     return
 
 @app.route('/')
 @app.route('/index')
 def index(filename=None):
+
+    #remove older files than 5 min from /upload
+    now = time.time()
+    for f in os.listdir(app.config['UPLOAD_FOLDER']):
+        if os.stat(os.path.join(app.config['UPLOAD_FOLDER'],f)).st_mtime < now - 1*60*5:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],f))
+
     if filename==None:
         filename = app.config['INITIAL_SIGN']
+        render_filename = filename[len(app.config['MYDIR']):] 
+    else:
+        render_filename = filename[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+
     app.logger.info("filename {}".format(filename))
 
-    figures, sign_name, iconpath, top_probability, eval_time_str = ml_figures(filename)
+    figures, sign_name, iconpath, top_probability, eval_time_str, filename_stn_in, filename_stn_out= ml_figures(filename)
 
     # plot ids for the html id tag
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
 
     # Convert the plotly figures to JSON for javascript in html template
     figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
-    render_filename = filename[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+    
+    render_filename_stn_in = filename_stn_in[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+    render_filename_stn_out = filename_stn_out[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
 
     return render_template('index.html',
                             ids=ids,
@@ -85,7 +103,9 @@ def index(filename=None):
                             input_filename=render_filename,
                             sign_name=sign_name, 
                             probability=str(top_probability), 
-                            eval_time=eval_time_str)
+                            eval_time=eval_time_str, 
+                            filename_stn_in=render_filename_stn_in,
+                            filename_stn_out=render_filename_stn_out)
 
 @app.route('/figures')
 def figures():
@@ -125,7 +145,7 @@ def upload_image():
             filename = secure_filename(file.filename)
             filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filename_path)
-#            return redirect(url_for('uploaded_file',filename=filename))
+            #return redirect(url_for('uploaded_file',filename=filename))
             return index(filename_path)
     return render_template('upload_image.html')
 
