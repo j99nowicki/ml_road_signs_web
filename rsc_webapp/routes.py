@@ -3,10 +3,17 @@ import json, plotly
 from flask import render_template, request, redirect, send_from_directory, url_for
 from wrangling_scripts.wrangle_data import return_figures
 from classifier.cnn_classifier import return_inference, ml_figures
+from classifier.model_1 import BaselineNet
 import os
 import logging
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
+import urllib.request
+import tarfile
+
+import torch
+from torchvision import transforms
+
 
 MYDIR = os.path.dirname(__file__)
 UPLOAD_FOLDER_REL = '/static/img/uploads'
@@ -14,40 +21,71 @@ UPLOAD_FOLDER = MYDIR + UPLOAD_FOLDER_REL
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 app.config['UPLOAD_FOLDER_REL'] = '/static/img/uploads'
+app.config['ICONS_FOLDER'] = '/static/img/icons'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
-app.config['INITIAL_SIGN'] = 'attention_sign.png'
+app.config['INITIAL_SIGN'] = os.path.join(app.config['UPLOAD_FOLDER'], 'attention_sign.png')
 
 logging.basicConfig(level=logging.DEBUG)
 
+def extract_tar_gz(filename, destination_dir):
+    with tarfile.open(filename, 'r:gz') as _tar:
+        _tar.extractall(destination_dir)
+
 @app.before_first_request
 def initalize_model():
-    app.logger.info("Initalizing a model")
-    return
+    app.logger.info('Initalizing a model')
+    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/model-pt/model-1-99-177.tar.gz', MYDIR+'/static/ml/model-1-99-177.tar.gz')
+    extract_tar_gz(MYDIR+'/static/ml/model-1-99-177.tar.gz', MYDIR+'/static/ml/')
+    model = BaselineNet().to('cpu')
+    model.load_state_dict(torch.load(MYDIR+'/static/ml/model.pre-trained_5', map_location=torch.device('cpu')))
+    model.eval()
+    transform_evaluate = transforms.Compose([
+            transforms.Resize((32,32)),
+            transforms.Grayscale(1),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.5], std=[0.5])
+    ])
+    app.config['MODEL'] = model
+    app.config['TRANSFORM_EVALUATE'] = transform_evaluate
 
+    labels_path = 'data/class_index.json'
+    with open(labels_path) as json_data:
+        idx_to_labels = json.load(json_data)
+    app.config['IDX_TO_LABELS'] = idx_to_labels
+
+    labels = []
+    for k, v in idx_to_labels.items():
+      labels.append(v[1])
+    app.config['LABELS'] = labels
+
+
+    return
 
 @app.route('/')
 @app.route('/index')
 def index(filename=None):
     if filename==None:
         filename = app.config['INITIAL_SIGN']
-    input_filename = os.path.join(app.config['UPLOAD_FOLDER_REL'], filename)
-    figures, sign_name, top_probability, torch_test = ml_figures()
-    app.logger.info("Torch test {}".format(torch_test))
+    app.logger.info("filename {}".format(filename))
 
+    figures, sign_name, iconpath, top_probability, eval_time_str = ml_figures(filename)
 
     # plot ids for the html id tag
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
 
     # Convert the plotly figures to JSON for javascript in html template
     figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+    render_filename = filename[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
 
     return render_template('index.html',
                             ids=ids,
                             figuresJSON=figuresJSON,
-                            input_filename=input_filename,
+                            iconpath=iconpath,
+                            input_filename=render_filename,
                             sign_name=sign_name, 
-                            probability=str(top_probability))
+                            probability=str(top_probability), 
+                            eval_time=eval_time_str)
 
 @app.route('/figures')
 def figures():
@@ -85,9 +123,10 @@ def upload_image():
             return redirect(request.url)
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filename_path)
 #            return redirect(url_for('uploaded_file',filename=filename))
-            return index(filename=filename)
+            return index(filename_path)
     return render_template('upload_image.html')
 
 

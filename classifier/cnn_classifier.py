@@ -1,13 +1,18 @@
 from __future__ import print_function
+from rsc_webapp import app
 import torch
 import pandas as pd
 import plotly.graph_objs as go
 import numpy as np
 import json
+
+from torchvision import transforms
+from torch.nn import functional as F
+from PIL import Image
+import time
+
 #import torch
 #from torchvision import datasets, models, transforms
-
-
 
 def return_inference(img_path=None):
     """Creates four plotly visualizations
@@ -36,38 +41,48 @@ def return_inference(img_path=None):
     return
 
 
-def ml_figures():
+def ml_figures(input_filename):
     """Creates plotly visualizations
 
     Args:
-        None
+        model:          torch model, pretrained, set in eval mode
+        input_filename: full path to the input file
+        transform_evaluate: torchvision transforms to be applied to input image
 
     Returns:
         list (dict): list containing the plotly visualizations
 
     """
-    df = pd.read_csv('data/probabilities.csv')
 
-    labels_path = 'data/class_index.json'
-    with open(labels_path) as json_data:
-        idx_to_labels = json.load(json_data)
-    predicted_label = idx_to_labels[str(18)][1]
+    model = app.config['MODEL']
+    transform_evaluate = app.config['TRANSFORM_EVALUATE'] 
 
-    top_probability = 0.999941
+    img_paths = [input_filename]
+    img_list = [Image.open(img_path) for img_path in img_paths]
+    start_time = time.perf_counter()
+    input_batch = torch.stack([transform_evaluate(img).to('cpu') for img in img_list])
+    pred_tensor = model(input_batch)
+    pred_probs = F.softmax(pred_tensor, dim=1).cpu().data.numpy()
+    end_time = time.perf_counter()
+    eval_time_str = "{:.4f}".format(end_time - start_time)
+#    app.logger.info("evaluation time: {} seconds".format(eval_time_str))
+    maxConfidenceValue = np.amax(pred_probs[0,:])
+    maxConfidenceValue_str = "{:.4f}".format(maxConfidenceValue)
+    maxConfidenceClass = np.where(pred_probs[0,:] == maxConfidenceValue)[0][0]
+#    app.logger.info('maxConfidenceClass: {}'.format(maxConfidenceClass))
+#    app.logger.info('maxConfidenceValue: {}'.format(maxConfidenceValue_str))
 
-    from rsc_webapp import app
-    labels = []
-    for k, v in idx_to_labels.items():
-      labels.append(v[1])
+    iconpath = app.config['ICONS_FOLDER'] + '/'+str(maxConfidenceClass)+".png"
 
-    df = pd.read_csv('data/probabilities.csv')
-    df.columns = ['class_id','probability']
-    
+    idx_to_labels = app.config['IDX_TO_LABELS']
+    labels = app.config['LABELS']
+
+    predicted_label = idx_to_labels[str(maxConfidenceClass)][1]
     graph_prob = []
 
     graph_prob.append(
       go.Bar(
-      x = df.probability.tolist(),
+      x = pred_probs[0],
       y = labels,
       orientation='h',
       textposition='outside',
@@ -110,4 +125,4 @@ def ml_figures():
     # append all charts to the figures list
     figures = []
     figures.append(dict(data=graph_prob, layout=layout_prob))
-    return figures, predicted_label, top_probability, torch.rand(5, 3)
+    return figures, predicted_label, iconpath, maxConfidenceValue_str, eval_time_str

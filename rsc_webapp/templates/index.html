@@ -80,9 +80,10 @@
                     <div class="card-body">
                       <h5 class="card-title">{{sign_name}}</h5>
                       <div class="predict-image">
-                          <img src="/static/img/icons/18.png" class="rounded h-100 mw-100" alt="Predicted sign class">
+                          <img src="{{iconpath}}" class="rounded h-100 mw-100" alt="Predicted sign class">
                       </div>
-                      <p class="card-text">With probability: {{probability}}</p>
+                      <p class="card-text">With confidence: {{probability}}</p>
+                      <p class="card-text small">Evaluation time: {{eval_time}} seconds</p>
                     </div>
                   </div>
                 </div>
