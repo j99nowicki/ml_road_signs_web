@@ -24,6 +24,8 @@ app.config['ICONS_FOLDER'] = '/static/img/icons'
 app.config['PRELOADED_FOLDER'] = '/static/img/icons'
 app.config['UPLOAD_FOLDER'] = app.config['MYDIR'] + app.config['UPLOAD_FOLDER_REL']
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
+app.config['SAMPLES_FOLDER'] = '/static/img/samples'
+
 app.config['INITIAL_SIGN'] = app.config['MYDIR'] + app.config['IMG_FOLDER_REL']+ '/attention_sign.png'
 
 logging.basicConfig(level=logging.DEBUG)
@@ -32,8 +34,20 @@ def extract_tar_gz(filename, destination_dir):
     with tarfile.open(filename, 'r:gz') as _tar:
         _tar.extractall(destination_dir)
 
+def mkdir(dir):
+    try:
+        os.mkdir(dir)
+    except FileExistsError:
+        pass
+    return
+
 @app.before_first_request
 def initalize():
+    #make sure directories for downloaded files are ready
+    mkdir(app.config['UPLOAD_FOLDER'])
+    mkdir(app.config['MYDIR'] + app.config['SAMPLES_FOLDER']) 
+    mkdir(app.config['MYDIR'] + '/static/ml/')
+
     app.logger.info('Initalizing a model')
     urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/model-pt/model-1-99-177.tar.gz', app.config['MYDIR']  +'/static/ml/model-1-99-177.tar.gz')
     extract_tar_gz(app.config['MYDIR'] +'/static/ml/model-1-99-177.tar.gz', app.config['MYDIR'] +'/static/ml/')
@@ -49,7 +63,11 @@ def initalize():
     app.config['MODEL'] = model
     app.config['TRANSFORM_EVALUATE'] = transform_evaluate
 
-    app.logger.info('Loading labels')
+    app.logger.info('Downloading and installing sample images')
+    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/samples/samples.tar.gz', app.config['MYDIR']  +'/static/img/samples/samples.tar.gz')
+    extract_tar_gz(app.config['MYDIR']  +'/static/img/samples/samples.tar.gz', app.config['MYDIR'] +'/static/img/samples')
+
+    app.logger.info('Loading class labels')
     labels_path = 'data/class_index.json'
     with open(labels_path) as json_data:
         idx_to_labels = json.load(json_data)
@@ -60,13 +78,9 @@ def initalize():
       labels.append(v[1])
     app.config['LABELS'] = labels
 
-    #make sure the directory for uploading files is created
-    try:
-        os.mkdir(app.config['UPLOAD_FOLDER'])
-    except FileExistsError:
-        pass
-
     return
+
+
 def clean_old_files():
     '''
     Removes files from /upload older than 5 min
@@ -113,15 +127,14 @@ def index(filename=None):
                             filename_stn_in=render_filename_stn_in,
                             filename_stn_out=render_filename_stn_out)
 
-@app.route('/image/<sign_class>')
-def image(sign_class):
+def sample_image(render_filename):
     
-    clean_old_files()
-
-    render_filename = app.config['PRELOADED_FOLDER'] + '/' + sign_class + '.png'
     filename = app.config['MYDIR'] + render_filename
 
+    clean_old_files()
+
     app.logger.info("filename {}".format(filename))
+    app.logger.info("render_filename {}".format(render_filename))
 
     figures, sign_name, iconpath, top_probability, eval_time_str, filename_stn_in, filename_stn_out= ml_figures(filename)
 
@@ -144,6 +157,22 @@ def image(sign_class):
                             eval_time=eval_time_str, 
                             filename_stn_in=render_filename_stn_in,
                             filename_stn_out=render_filename_stn_out)
+
+@app.route('/image/high_confidence/<file_path>')
+def sample_image_high_confidence(file_path):
+    return sample_image(app.config['SAMPLES_FOLDER'] + '/high_confidence/' + file_path)
+
+@app.route('/image/low_confidence/<file_path>')
+def sample_image_low_confidence(file_path):
+    return sample_image(app.config['SAMPLES_FOLDER'] + '/low_confidence/' + file_path)
+
+@app.route('/image/medium_confidence/<file_path>')
+def sample_image_medium_confidence(file_path):
+    return sample_image(app.config['SAMPLES_FOLDER'] + '/medium_confidence/' + file_path)
+
+@app.route('/image/losers/<file_path>')
+def sample_image_losers(file_path):
+    return sample_image(app.config['SAMPLES_FOLDER'] + '/losers/' + file_path)
 
 @app.route('/figures')
 def figures():
