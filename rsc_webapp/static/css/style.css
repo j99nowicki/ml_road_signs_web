@@ -1,12 +1,13 @@
 .sign-image{
     height: 200px;
-    height: 200px;
+    width: 200px;
+    max-width: 200px;
  }
 
  .predict-image{
     width: 100px;
     height: 100px;
- }
+}
 
  .card{
     max-width: 600px;

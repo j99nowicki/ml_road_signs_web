@@ -21,6 +21,7 @@ app.config['MYDIR'] = os.path.dirname(__file__)
 app.config['UPLOAD_FOLDER_REL'] = '/static/img/uploads'
 app.config['IMG_FOLDER_REL'] = '/static/img'
 app.config['ICONS_FOLDER'] = '/static/img/icons'
+app.config['PRELOADED_FOLDER'] = '/static/img/icons'
 app.config['UPLOAD_FOLDER'] = app.config['MYDIR'] + app.config['UPLOAD_FOLDER_REL']
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
 app.config['INITIAL_SIGN'] = app.config['MYDIR'] + app.config['IMG_FOLDER_REL']+ '/attention_sign.png'
@@ -66,22 +67,59 @@ def initalize():
         pass
 
     return
+def clean_old_files():
+    '''
+    Removes files from /upload older than 5 min
+    '''
+    now = time.time()
+    for f in os.listdir(app.config['UPLOAD_FOLDER']):
+        if os.stat(os.path.join(app.config['UPLOAD_FOLDER'],f)).st_mtime < now - 1*60*5:
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],f))
+    return
 
 @app.route('/')
 @app.route('/index')
 def index(filename=None):
 
-    #remove older files than 5 min from /upload
-    now = time.time()
-    for f in os.listdir(app.config['UPLOAD_FOLDER']):
-        if os.stat(os.path.join(app.config['UPLOAD_FOLDER'],f)).st_mtime < now - 1*60*5:
-            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],f))
+    clean_old_files()
 
     if filename==None:
         filename = app.config['INITIAL_SIGN']
         render_filename = filename[len(app.config['MYDIR']):] 
     else:
         render_filename = filename[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+
+    app.logger.info("filename {}".format(filename))
+
+    figures, sign_name, iconpath, top_probability, eval_time_str, filename_stn_in, filename_stn_out= ml_figures(filename)
+
+    # plot ids for the html id tag
+    ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
+
+    # Convert the plotly figures to JSON for javascript in html template
+    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+    
+    render_filename_stn_in = filename_stn_in[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+    render_filename_stn_out = filename_stn_out[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
+
+    return render_template('index.html',
+                            ids=ids,
+                            figuresJSON=figuresJSON,
+                            iconpath=iconpath,
+                            input_filename=render_filename,
+                            sign_name=sign_name, 
+                            probability=str(top_probability), 
+                            eval_time=eval_time_str, 
+                            filename_stn_in=render_filename_stn_in,
+                            filename_stn_out=render_filename_stn_out)
+
+@app.route('/image/<sign_class>')
+def image(sign_class):
+    
+    clean_old_files()
+
+    render_filename = app.config['PRELOADED_FOLDER'] + '/' + sign_class + '.png'
+    filename = app.config['MYDIR'] + render_filename
 
     app.logger.info("filename {}".format(filename))
 
@@ -128,7 +166,8 @@ def allowed_file(filename):
 
 @app.route('/upload-image', methods=['GET', 'POST'])
 def upload_image():
-    app.logger.info("/upload-image method:{}, request.files: {}".format(request.method,request.files ))
+
+    clean_old_files()
 
     if request.method == "POST":
         # check if the post request has the file part

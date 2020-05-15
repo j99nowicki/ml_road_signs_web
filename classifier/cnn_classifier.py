@@ -58,6 +58,7 @@ def generate_filename(size=10, chars=string.ascii_uppercase + string.digits, ext
     """
   filename = ''.join(random.choice(chars) for _ in range(size))
   return filename + '.' + extension
+  
 
 def ml_figures(input_filename):
     """Creates plotly visualizations
