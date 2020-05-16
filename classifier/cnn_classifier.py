@@ -112,6 +112,7 @@ def ml_figures(input_filename):
       x = pred_probs[0],
       y = labels,
       orientation='h',
+      showlegend=False,
       textposition='outside',
       marker=dict(
         color='rgba(23, 162, 184,  0.6)', ##17a2b8
@@ -144,12 +145,12 @@ def ml_figures(input_filename):
                     range=[0, 1],
                     tick=0.1),
                 yaxis = dict(dtick=1),
-                height=800,
+                height=900,
                 #annotations=annotations,
-                margin=dict(l=280, r=20, t=30, b=50),
+                margin=dict(l=300, r=20, t=30, b=50),
                 paper_bgcolor='rgb(248, 249, 250)',
                 plot_bgcolor='rgb(248, 249, 250)',
-                uniformtext_minsize=8, uniformtext_mode='hide'
+                uniformtext=dict(minsize=9, mode='hide')               
                 )
     
     # append all charts to the figures list

@@ -13,6 +13,7 @@ import tarfile
 import time
 import torch
 from torchvision import transforms
+import random
 
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -26,7 +27,8 @@ app.config['UPLOAD_FOLDER'] = app.config['MYDIR'] + app.config['UPLOAD_FOLDER_RE
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 # file size limit: 5MB
 app.config['SAMPLES_FOLDER'] = '/static/img/samples'
 
-app.config['INITIAL_SIGN'] = app.config['MYDIR'] + app.config['IMG_FOLDER_REL']+ '/attention_sign.png'
+#app.config['INITIAL_SIGN'] = app.config['MYDIR'] + app.config['IMG_FOLDER_REL']+ '/attention_sign.png'
+app.config['INITIAL_SIGN'] = app.config['MYDIR'] + '/static/img/samples/low_confidence/{}.png'
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -43,6 +45,16 @@ def mkdir(dir):
 
 @app.before_first_request
 def initalize():
+    '''
+    This method is only called once at the first request:
+    - create directories for downloaded resources
+    - downloads model paramters and initalizes model instance
+    - downloads and installs sample images
+    - loads class labels from file to list
+    
+    Note: Make sure to have outbound Internet connection 
+    and forward proxy configuration ready on your system before stating the server 
+    '''
     #make sure directories for downloaded files are ready
     mkdir(app.config['UPLOAD_FOLDER'])
     mkdir(app.config['MYDIR'] + app.config['SAMPLES_FOLDER']) 
@@ -83,11 +95,11 @@ def initalize():
 
 def clean_old_files():
     '''
-    Removes files from /upload older than 5 min
+    Removes files from /upload older than 5 seconds
     '''
     now = time.time()
     for f in os.listdir(app.config['UPLOAD_FOLDER']):
-        if os.stat(os.path.join(app.config['UPLOAD_FOLDER'],f)).st_mtime < now - 1*60*5:
+        if os.stat(os.path.join(app.config['UPLOAD_FOLDER'],f)).st_mtime < now - 5:
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],f))
     return
 
@@ -98,7 +110,7 @@ def index(filename=None):
     clean_old_files()
 
     if filename==None:
-        filename = app.config['INITIAL_SIGN']
+        filename = app.config['INITIAL_SIGN'].format(random.randint(0,42))
         render_filename = filename[len(app.config['MYDIR']):] 
     else:
         render_filename = filename[len(app.config['UPLOAD_FOLDER']) - len(app.config['UPLOAD_FOLDER_REL']):] 
@@ -174,20 +186,6 @@ def sample_image_medium_confidence(file_path):
 def sample_image_losers(file_path):
     return sample_image(app.config['SAMPLES_FOLDER'] + '/losers/' + file_path)
 
-@app.route('/figures')
-def figures():
-    figures = return_figures()
-
-    # plot ids for the html id tag
-    ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
-
-    # Convert the plotly figures to JSON for javascript in html template
-    figuresJSON = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
-
-    return render_template('index.html',
-                           ids=ids,
-                           figuresJSON=figuresJSON)
-
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -213,15 +211,9 @@ def upload_image():
             filename = secure_filename(file.filename)
             filename_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filename_path)
-            #return redirect(url_for('uploaded_file',filename=filename))
             return index(filename_path)
     return render_template('upload_image.html')
 
-
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
 
 
 @app.errorhandler(413)
