@@ -18,32 +18,6 @@ import matplotlib.pyplot as plt
 #import torch
 #from torchvision import datasets, models, transforms
 
-def return_inference(img_path=None):
-    """Creates four plotly visualizations
-
-    Args:
-        img_path: path to input image
-
-    Returns:
-        list (dict): list with predictions for each category
-
-    """
-    '''
-    model.eval()
-    img_transform=data_transform_test(Image.open(img_path)).to(device)
-    input = torch.stack([img_transform])
-
-    output = model(input)
-    output = F.softmax(output, dim=1)
-    prediction_score, pred_label_idx = torch.topk(output, 1)
-    
-    #pred_label_idx.squeeze_()
-    #visualize_stn(input)
-    
-    return pred_label_idx
-    '''
-    return
-
 def generate_filename(size=10, chars=string.ascii_uppercase + string.digits, extension='png'):
   """Creates random filename
 
@@ -61,15 +35,21 @@ def generate_filename(size=10, chars=string.ascii_uppercase + string.digits, ext
   
 
 def ml_figures(input_filename):
-    """Creates plotly visualizations
+    """ 
+    Performs inference on the input image and returns data 
+    to be visualized by the web page
 
     Args:
-        model:          torch model, pretrained, set in eval mode
         input_filename: full path to the input file
-        transform_evaluate: torchvision transforms to be applied to input image
 
     Returns:
-        list (dict): list containing the plotly visualizations
+        figures: dict list containing plotly graph with probabilities for all classes
+        predicted_label: a string with predicted label name
+        iconpath: a path to predicted sign icon
+        maxConfidenceValue_str: confidence value for the top prediction
+        eval_time_str: time it took to load and evaluate the model
+        filename_stn_in: path to STN input file 
+        filename_stn_out: path to STN output file
 
     """
 

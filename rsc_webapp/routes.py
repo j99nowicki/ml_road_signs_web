@@ -1,8 +1,7 @@
 from rsc_webapp import app
 import json, plotly
 from flask import render_template, request, redirect, send_from_directory, url_for
-from wrangling_scripts.wrangle_data import return_figures
-from classifier.cnn_classifier import return_inference, ml_figures
+from classifier.cnn_classifier import ml_figures
 from classifier.model_1 import BaselineNet
 import os
 import logging
@@ -14,7 +13,6 @@ import time
 import torch
 from torchvision import transforms
 import random
-
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
@@ -117,7 +115,7 @@ def index(filename=None):
 
     app.logger.info("filename {}".format(filename))
 
-    figures, sign_name, iconpath, top_probability, eval_time_str, filename_stn_in, filename_stn_out= ml_figures(filename)
+    figures, sign_name, iconpath, top_probability, eval_time_str, filename_stn_in, filename_stn_out = ml_figures(filename)
 
     # plot ids for the html id tag
     ids = ['figure-{}'.format(i) for i, _ in enumerate(figures)]
