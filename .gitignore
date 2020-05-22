@@ -1,0 +1,8 @@
+rsc_webapp/static/img/samples/
+rsc_webapp/static/img/uploads/
+rsc_webapp/static/ml/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
