@@ -8,9 +8,13 @@ Model training project: https://github.com/j99nowicki/ml_road_signs
 
 # Example screenshots
 
+Main page views with example inferences: <br>
+![Screenshot - Main page](screenshot_1.png)
 
+Input file selection options: <br>
+![Screenshot - Input options](screenshot_2.png)
 
-# Deployemnt instructions 
+# Deployment instructions 
 
 ## Local deoloyment
 
