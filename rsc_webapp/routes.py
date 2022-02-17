@@ -59,7 +59,7 @@ def initalize():
     mkdir(app.config['MYDIR'] + '/static/ml/')
 
     app.logger.info('Initalizing a model')
-    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/model-pt/model-1-99-177.tar.gz', app.config['MYDIR']  +'/static/ml/model-1-99-177.tar.gz')
+    urllib.request.urlretrieve ('https://github.com/j99nowicki/ml_road_signs_model/raw/main/model-1-99-177.tar.gz', app.config['MYDIR']  +'/static/ml/model-1-99-177.tar.gz')
     extract_tar_gz(app.config['MYDIR'] +'/static/ml/model-1-99-177.tar.gz', app.config['MYDIR'] +'/static/ml/')
     model = BaselineNet().to('cpu')
     model.load_state_dict(torch.load(app.config['MYDIR'] +'/static/ml/model.pre-trained_5', map_location=torch.device('cpu')))
@@ -74,7 +74,7 @@ def initalize():
     app.config['TRANSFORM_EVALUATE'] = transform_evaluate
 
     app.logger.info('Downloading and installing sample images')
-    urllib.request.urlretrieve ('https://rsc-public-static.s3.amazonaws.com/samples/samples.tar.gz', app.config['MYDIR']  +'/static/img/samples/samples.tar.gz')
+    urllib.request.urlretrieve ('https://github.com/j99nowicki/ml_road_signs_model/raw/main/samples.tar.gz', app.config['MYDIR']  +'/static/img/samples/samples.tar.gz')
     extract_tar_gz(app.config['MYDIR']  +'/static/img/samples/samples.tar.gz', app.config['MYDIR'] +'/static/img/samples')
 
     app.logger.info('Loading class labels')
