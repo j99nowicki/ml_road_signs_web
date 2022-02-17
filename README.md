@@ -32,11 +32,13 @@ To run the project locally:
 5. Update requirements.txt
 
     For Heroku deployemnt, torch and torchvision packages are deployed with hardcoded URLs to exact distributions.
-    Your environemnt might be differnt, so first replace them with:
+    Your environemnt might be differnt. If space and memory is not a concern replace them with the following values:
 ```
         torch==1.5.0+cpu
         torchvision==0.6.0+cpu
 ```
+    In case you get an error becuase the relevant combination cannot be found for your system, you can look up the version here: https://download.pytorch.org/whl/torch_stable.html
+    For example this woudl be torch version with CPU only support for Python 3.7 on 386 architecture https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-linux_x86_64.whl
 
 4. Install dependencies from requirements.txt
 ```
