@@ -35,7 +35,7 @@ To run the project locally:
     Your environemnt might be differnt, so first replace them with:
 ```
         torch==1.5.0+cpu
-        torchvision==0.0.6+cpu
+        torchvision==0.6.0+cpu
 ```
 
 4. Install dependencies from requirements.txt
