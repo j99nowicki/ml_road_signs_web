@@ -31,14 +31,14 @@ To run the project locally:
 ```
 5. Update requirements.txt
 
-    For Heroku deployemnt, torch and torchvision packages are deployed with hardcoded URLs to exact distributions.
-    Your environemnt might be differnt. If space and memory is not a concern replace them with the following values:
+   For Heroku deployemnt, torch and torchvision packages are deployed with hardcoded URLs to exact distributions.
+   Your environemnt might be differnt. If space and memory is not a concern replace them with the following values:
 ```
         torch==1.5.0+cpu
         torchvision==0.6.0+cpu
 ```
-    In case you get an error becuase the relevant combination cannot be found for your system, you can look up the version here: https://download.pytorch.org/whl/torch_stable.html
-    For example this woudl be torch version with CPU only support for Python 3.7 on 386 architecture https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-linux_x86_64.whl
+   In case you get an error becuase the relevant combination cannot be found for your system, you can look up the version here: https://download.pytorch.org/whl/torch_stable.html
+   For example this would be torch version with CPU only support for Python 3.7 on 386 architecture https://download.pytorch.org/whl/cpu/torch-1.5.0%2Bcpu-cp37-cp37m-linux_x86_64.whl
 
 4. Install dependencies from requirements.txt
 ```
@@ -48,12 +48,12 @@ To run the project locally:
 ```
     python rsc_webapp.py
 ```
-    Note: your computer will need outgoing connectivity to Internet, so check your system proxy settings or connect without proxy.
+   Note: your computer will need outgoing connectivity to Internet, so check your system proxy settings or connect without proxy.
 
 6. In the browser go to: http://127.0.0.1:3001/
 
 
-## Deployemtn in Heroku
+## Deployment in Heroku
 
 1. Create Heroku account
 
@@ -63,7 +63,7 @@ To run the project locally:
 ```
     git remote add github https://github.com/j99nowicki/ml_road_signs_web.git
 ```
-    Inspect git remote repos, you should see two:
+   Inspect git remote repos, you should see two:
 ```
     git remote -v
     github  https://github.com/j99nowicki/ml_road_signs_web.git (fetch)
@@ -79,5 +79,5 @@ To run the project locally:
 ```
     git push heroku master
 ```
-6. When the push completes, visit your application URL: https://[HEROKU APP NAME].herokuapp.com
+6. When the push completes, visit your application URL: https://rscwebapp.herokuapp.com
 
